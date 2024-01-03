@@ -1,6 +1,6 @@
 # tetris
 
-10 by 40 simple tetris game. 
+Simple 10 by 40 tetris game. 
 
 Made with the following:
 Canvas API and Vanilla JS
