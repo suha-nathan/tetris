@@ -53,8 +53,12 @@ let map = {
   getRow: function (y) {},
   getX: function (col) {
     //at a column position col, returns the x axis pixel position of that col (top left vertex)
+    return col * map.tileSize;
   },
-  getY: function (row) {},
+  getY: function (row) {
+    //at a row pose, returns the y axis position (top left vertex of tile)
+    return row * map.tileSize;
+  },
   setEmpty: function () {
     //resets map blockLayer to array of zeros.
     let layerLength = this.cols * this.rows;
@@ -65,7 +69,7 @@ let map = {
 
 class Termino {
   type; //L, T, line, square.
-  posX;
+  posX; //unit is tiles (not px)
   posY;
   row; //shape of termino -> no of rows
   col; //shape of termino -> no of cols
@@ -84,28 +88,48 @@ class Termino {
 
     this.posX = ~~(map.cols / 2) - ~~(this.col / 2);
     this.posY = 0 + ~~(this.row / 2);
-    this.speed = 2; //tiles per second
+    this.speed = 0.5; //tiles per second - downward velocity
   }
 
   move(delta, x, y) {
     // is x and in pixels or map units?
-    console.log("moving");
+    this.posX += x * this.speed;
+    this.posY += y * this.speed;
+    // check for left right collision
+    this.collide(x, y);
+    this.landing();
 
-    this.posX += x;
-    this.posY += y;
+    //clamp  x y values here
   }
 
   rotate() {
     //rotates shape by 90degrees, clockwise
   }
 
-  collide() {
-    //handles left right collision
+  collide(x, y) {
+    //handles left right and bottom collision
+    let col;
+    let left = this.posX;
+    let right = this.posX + this.col;
+
+    //check for collision on left and right
+    //!!TODO not just map, it could be a block on left and right
+    let collision = left <= 0 || right >= map.cols;
+    if (collision) {
+      if (x < 0) {
+        this.posX = 0;
+      } else if (x > 0) {
+        this.posX = map.cols - this.col;
+      }
+    }
   }
 
   landing() {
     //handles termino landing on map.
     let isLanded = false;
+
+    //landing on blocks or bottom of map only occurs when
+    // termino
 
     return isLanded;
   }
@@ -123,10 +147,13 @@ Game.tick = function (elapsed) {
   let delta = (elapsed - this.prevElapsed) / 1000.0;
   delta = Math.min(delta, 0.25);
 
-  this.update(delta); //updating game state/map/termino position
-  this.render(); //re-rendering/drawing the map and termino
+  if (elapsed - this.prevElapsed >= 60) {
+    this.update(delta); //updating game state/map/termino position
+    this.render(); //re-rendering/drawing the map and termino
 
-  this.prevElapsed = elapsed;
+    console.log(elapsed);
+    this.prevElapsed = elapsed;
+  }
   window.requestAnimationFrame(this.tick);
 }.bind(Game);
 
@@ -210,11 +237,11 @@ Game.update = (delta) => {
 
   //handle Termino movement.
   let x = 0;
-  let y = 0;
+  let y = 0.1; //change this to determine speed of termino
   let rotate = false;
   if (Keyboard.isDown(Keyboard.LEFT)) x = -1;
   if (Keyboard.isDown(Keyboard.RIGHT)) x = 1;
-  if (Keyboard.isDown(Keyboard.DOWN)) y = 1;
+  if (Keyboard.isDown(Keyboard.DOWN)) y += 1;
   if (Keyboard.isDown(Keyboard.SPACE)) rotate = true;
 
   this.curTermino.move(delta, x, y); //handles termino position
