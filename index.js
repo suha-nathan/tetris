@@ -59,6 +59,19 @@ let map = {
     //at a row pose, returns the y axis position (top left vertex of tile)
     return row * map.tileSize;
   },
+  getIndex(col, row) {
+    //for a given row, col position returns the index of the tile in blockLayer
+    // 0,0 of row, col is top left of game canvas.
+    // 0th position of block layer is bottom left.
+
+    let fromTopLeft = row * this.cols + col; //index position from (0,0) at top left corner
+    let fromBotRight = blockLayer.length - fromTopLeft;
+
+    let numRowsFromBottom = ~~(fromBotRight / this.cols);
+    let resultIdx = numRowsFromBottom * this.cols + col;
+
+    return resultIdx;
+  },
   setEmpty: function () {
     //resets map blockLayer to array of zeros.
     let layerLength = this.cols * this.rows;
@@ -74,7 +87,7 @@ class Termino {
   row; //shape of termino -> no of rows
   col; //shape of termino -> no of cols
   speed;
-  shape = [];
+  shape = []; // 1 dimension array described by col and row
   constructor(type) {
     if (type === "square" || type === 0) {
     } else if (type === "line" || type == 1) {
@@ -92,14 +105,15 @@ class Termino {
   }
 
   move(delta, x, y) {
-    // is x and in pixels or map units?
+    prevX = this.posX;
+    prevY = this.posY;
     this.posX += x * this.speed;
     this.posY += y * this.speed;
     // check for left right collision
     this.collide(x, y);
     this.landing();
 
-    //clamp  x y values here
+    //clamp  x y values here ?
   }
 
   rotate() {
@@ -113,14 +127,57 @@ class Termino {
     let right = this.posX + this.col;
 
     //check for collision on left and right
-    //!!TODO not just map, it could be a block on left and right
-    let collision = left <= 0 || right >= map.cols;
-    if (collision) {
-      if (x < 0) {
-        this.posX = 0;
-      } else if (x > 0) {
-        this.posX = map.cols - this.col;
+
+    let collisionMap = left <= 0 || right >= map.cols;
+    // if (collisionMap) {
+    //   if (x < 0) {
+    //     this.posX = 0;
+    //   } else if (x > 0) {
+    //     this.posX = map.cols - this.col;
+    //   }
+    // }
+    //colliding with block on left right
+
+    let leftTiles = [];
+    let rightTiles = [];
+    let leftMost = 99,
+      rightMost = -99;
+    for (let i = 0; i < this.row; i++) {
+      for (let j = 0; i < this.col; j++) {
+        let curIdx = i * this.col + j;
+        if (this.shape[curIdx] == 1 && j <= leftMost) {
+          leftMost = j;
+          leftTiles.push(this.getPose(curIdx));
+        }
+        if (this.shape[curIdx] == 1 && j >= rightMost) {
+          rightMost = j;
+          rightTiles.push(this.getPose(curIdx));
+        }
       }
+    }
+    let checkRIdx, checkLIdx;
+    let leftCollision = false;
+    let rightCollision = false;
+    //check collision on all left blocks
+    leftTiles.forEach((tile) => {
+      //get adjacent map position
+      checkLIdx = map.getIndex(tile[0] - 1, tile[1]);
+      if (map.blockLayer[checkLIdx] == 1 && !leftCollision) {
+        //collision on left side
+        //handle termino x position
+        leftCollision = true;
+      }
+    });
+
+    rightTiles.forEach((tile) => {
+      checkRIdx = map.getIndex(tile[0] + 1, tile[1]);
+      if (map.blockLayer[checkRIdx] == 1 && !rightCollision) {
+        rightCollision = true;
+      }
+    });
+    if (leftCollision || rightCollision || collisionMap) {
+      this.posX = prevX;
+      this.posY = prevY;
     }
   }
 
@@ -128,10 +185,18 @@ class Termino {
     //handles termino landing on map.
     let isLanded = false;
 
-    //landing on blocks or bottom of map only occurs when
-    // termino
+    //landing on map bottom
 
+    //landing on blocks
     return isLanded;
+  }
+  getPose(idx) {
+    //input is the index of the tile in termino shape array
+    //returns position on map [x,y].
+    let deltaY = ~~(idx / this.col);
+    let deltaX = idx % this.col;
+    let pose = [this.posX + deltaX, this.posY - deltaY];
+    return pose;
   }
 }
 
