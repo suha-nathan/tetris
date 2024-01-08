@@ -59,13 +59,19 @@ let map = {
     //at a row pose, returns the y axis position (top left vertex of tile)
     return row * map.tileSize;
   },
-  getIndex(col, row) {
+  getPoseFromIndex: function (index) {
+    let row = ~~((index + 1) / this.cols);
+    let col = (index + 1) % this.cols;
+    let result = [col, row];
+    return result;
+  },
+  getIndex: function (col, row) {
     //for a given row, col position returns the index of the tile in blockLayer
     // 0,0 of row, col is top left of game canvas.
     // 0th position of block layer is bottom left.
 
     let fromTopLeft = row * this.cols + col; //index position from (0,0) at top left corner
-    let fromBotRight = blockLayer.length - fromTopLeft;
+    let fromBotRight = this.blockLayer.length - fromTopLeft;
 
     let numRowsFromBottom = ~~(fromBotRight / this.cols);
     let resultIdx = numRowsFromBottom * this.cols + col;
@@ -77,6 +83,26 @@ let map = {
     let layerLength = this.cols * this.rows;
     blockLayer = new Array(layerLength).fill(0);
   },
+  setTest: function () {
+    map.blockLayer = [
+      1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+      0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+      1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+    ];
+  },
   update: function (termino) {},
 };
 
@@ -86,8 +112,9 @@ class Termino {
   posY;
   row; //shape of termino -> no of rows
   col; //shape of termino -> no of cols
-  speed;
-  shape = []; // 1 dimension array described by col and row
+  speedX;
+  speedY;
+  shape = [];
   constructor(type) {
     if (type === "square" || type === 0) {
     } else if (type === "line" || type == 1) {
@@ -96,24 +123,32 @@ class Termino {
       this.type = 3; // el
       this.col = 3;
       this.row = 2;
-      this.shape = [1, 1, 1, 1, 1, 0, 0];
+      this.shape = [1, 1, 1, 1, 0, 0];
     }
 
     this.posX = ~~(map.cols / 2) - ~~(this.col / 2);
     this.posY = 0 + ~~(this.row / 2);
-    this.speed = 0.5; //tiles per second - downward velocity
+    this.speedX = 1; //tiles per second
+    this.speedY = 1; //tiles per second - downward velocity
+  }
+  getPose(idx) {
+    //input is the index of the tile in termino shape array
+    //returns position on map [x,y].
+    let deltaY = ~~(idx / this.col);
+    let deltaX = idx % this.col;
+
+    let pose = [this.posX + deltaX, this.posY - deltaY];
+    return pose;
   }
 
   move(delta, x, y) {
-    prevX = this.posX;
-    prevY = this.posY;
-    this.posX += x * this.speed;
-    this.posY += y * this.speed;
+    this.posX += x * this.speedX;
+    this.posY += y * this.speedY;
     // check for left right collision
     this.collide(x, y);
     this.landing();
 
-    //clamp  x y values here ?
+    //clamp  x y values here
   }
 
   rotate() {
@@ -127,57 +162,46 @@ class Termino {
     let right = this.posX + this.col;
 
     //check for collision on left and right
-
+    //!!TODO not just map, it could be a block on left and right
     let collisionMap = left <= 0 || right >= map.cols;
-    // if (collisionMap) {
-    //   if (x < 0) {
-    //     this.posX = 0;
-    //   } else if (x > 0) {
-    //     this.posX = map.cols - this.col;
-    //   }
-    // }
-    //colliding with block on left right
+    if (collisionMap) {
+      if (x < 0) {
+        this.posX = 0;
+      } else if (x > 0) {
+        this.posX = map.cols - this.col;
+      }
+    }
 
+    let leftMost, rightMost;
     let leftTiles = [];
     let rightTiles = [];
-    let leftMost = 99,
-      rightMost = -99;
     for (let i = 0; i < this.row; i++) {
-      for (let j = 0; i < this.col; j++) {
+      leftMost = 99; // reset the left most and right most after every row is analysed
+      rightMost = -99;
+      for (let j = 0; j < this.col; j++) {
         let curIdx = i * this.col + j;
         if (this.shape[curIdx] == 1 && j <= leftMost) {
           leftMost = j;
-          leftTiles.push(this.getPose(curIdx));
+          leftTiles[i] = this.getPose(curIdx);
         }
         if (this.shape[curIdx] == 1 && j >= rightMost) {
           rightMost = j;
-          rightTiles.push(this.getPose(curIdx));
+          rightTiles[i] = this.getPose(curIdx);
         }
       }
     }
+
     let checkRIdx, checkLIdx;
     let leftCollision = false;
     let rightCollision = false;
-    //check collision on all left blocks
-    leftTiles.forEach((tile) => {
-      //get adjacent map position
-      checkLIdx = map.getIndex(tile[0] - 1, tile[1]);
-      if (map.blockLayer[checkLIdx] == 1 && !leftCollision) {
-        //collision on left side
-        //handle termino x position
+    let leftXPose, rightXPose;
+    for (let i = 0; i < leftTiles.length && !leftCollision; i++) {
+      checkLIdx = map.getIndex(leftTiles[i][0] - 1, leftTiles[i][1]);
+      if (map.blockLayer[checkLIdx] == 1) {
         leftCollision = true;
+        leftXPose = map.getPoseFromIndex(checkLIdx);
+        console.log("leftCollision! ", leftXPose);
       }
-    });
-
-    rightTiles.forEach((tile) => {
-      checkRIdx = map.getIndex(tile[0] + 1, tile[1]);
-      if (map.blockLayer[checkRIdx] == 1 && !rightCollision) {
-        rightCollision = true;
-      }
-    });
-    if (leftCollision || rightCollision || collisionMap) {
-      this.posX = prevX;
-      this.posY = prevY;
     }
   }
 
@@ -185,18 +209,10 @@ class Termino {
     //handles termino landing on map.
     let isLanded = false;
 
-    //landing on map bottom
+    //landing on blocks or bottom of map only occurs when
+    // termino
 
-    //landing on blocks
     return isLanded;
-  }
-  getPose(idx) {
-    //input is the index of the tile in termino shape array
-    //returns position on map [x,y].
-    let deltaY = ~~(idx / this.col);
-    let deltaX = idx % this.col;
-    let pose = [this.posX + deltaX, this.posY - deltaY];
-    return pose;
   }
 }
 
@@ -216,7 +232,6 @@ Game.tick = function (elapsed) {
     this.update(delta); //updating game state/map/termino position
     this.render(); //re-rendering/drawing the map and termino
 
-    console.log(elapsed);
     this.prevElapsed = elapsed;
   }
   window.requestAnimationFrame(this.tick);
@@ -230,7 +245,24 @@ Game.drawMap = function () {
   let markX = 0;
   let markY = (map.rows - 1) * map.tileSize;
   //mock blockLayer
-  map.blockLayer = [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0];
+  //   map.blockLayer = [
+  //     1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0,
+  //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+  //     0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //     0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //     0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+  //     1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0,
+  //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+  //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+  //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+  //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+  //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+  //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+  //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+  //   ];
 
   map.blockLayer.forEach((tile, index) => {
     if (tile === 1) {
@@ -270,8 +302,8 @@ Game.drawTermino = () => {
         Game.ctx.stroke();
       }
       ///
-      markX = initX + (index % this.curTermino.col) * map.tileSize;
-      markY = initY - ~~(index / this.curTermino.col) * map.tileSize;
+      markX = initX + ((index + 1) % this.curTermino.col) * map.tileSize;
+      markY = initY - ~~((index + 1) / this.curTermino.col) * map.tileSize;
     }.bind(this)
   );
 };
@@ -289,7 +321,8 @@ Game.init = () => {
   this.gameState = 1; //1 game is active. 0 game over. !TODO - pause game play.
   this.curTermino = new Termino("el"); //!TODO - generate randomly
 
-  map.setEmpty();
+  //   map.setEmpty();
+  map.setTest();
 };
 
 Game.update = (delta) => {
@@ -302,7 +335,7 @@ Game.update = (delta) => {
 
   //handle Termino movement.
   let x = 0;
-  let y = 0.1; //change this to determine speed of termino
+  let y = 0; //change this to determine speed of termino
   let rotate = false;
   if (Keyboard.isDown(Keyboard.LEFT)) x = -1;
   if (Keyboard.isDown(Keyboard.RIGHT)) x = 1;
