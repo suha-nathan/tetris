@@ -194,6 +194,7 @@ Game.init = () => {
 Game.update = (delta) => {
   //left, right
   //spacebar (rotate)
+
   if (Keyboard.isDown(Keyboard.LEFT)) {
     if (
       this.curTermino.doesPieceFit(
@@ -241,22 +242,73 @@ Game.update = (delta) => {
   ) {
     console.log("rotate");
     this.curRotation += 1;
-    console.log(this.curRotation);
-    for (let i = 0; i < 4; i++) {
-      pi1 = this.curTermino.rotate(0, i, this.curRotation);
-      pi2 = this.curTermino.rotate(1, i, this.curRotation);
-      pi3 = this.curTermino.rotate(2, i, this.curRotation);
-      pi4 = this.curTermino.rotate(3, i, this.curRotation);
-      console.log(
-        this.curTermino.shape[pi1],
-        this.curTermino.shape[pi2],
-        this.curTermino.shape[pi3],
-        this.curTermino.shape[pi4]
-      );
+  }
+
+  if (this.gameState) {
+    //update difficulty every ___
+
+    ////test if the piece can be moved down
+    if (
+      this.curTermino.doesPieceFit(
+        this.curPosX,
+        this.curPosY + 1,
+        this.curRotation
+      )
+    ) {
+      this.curPosY++;
+    } else {
+      //lock piece in place
+      for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+          pi = this.rotate(j, i, rotation); // index of termino
+          fi = (this.curPosY + i) * map.cols + (this.curPosX + j); // index of map field
+          if (this.curTermino.shape[pi] == 1) {
+            map.blockLayer[fi] = 1;
+          }
+        }
+      }
+      let linesToBeCleared = [];
+      //check for lines that termino was in and remove
+      for (let i = 0; i < 4; i++) {
+        let toBeCleared = true;
+        for (let j = 0; j < map.rows && toBeCleared; j++) {
+          fi = (this.curPosY + i) * map.cols + j;
+          if (map.blockLayer[fi] == 0) {
+            toBeCleared = false;
+          }
+        }
+        if (toBeCleared) {
+          linesToBeCleared.push(this.curPosY + i);
+        }
+      }
+
+      if (linesToBeCleared.length > 0) {
+        linesToBeCleared.forEach((y) => {
+          for (let x = 0; x < map.cols; x++) {
+            map.blockLayer[y * map.cols + x] = 0; // clears the line but How to shift down??
+          }
+        });
+      }
+      //increase score
+
+      //pick new piece - update curTermino. reset piece position
+      let rand = Math.floor(Math.random() * 6 + 1);
+      this.curTermino = new Termino(rand);
+      this.curPosX = ~~(map.cols / 2) + 1;
+      this.curPosY = 0;
+      this.curRotation = 0;
+
+      //if new piece doesnt fit straight away, game over
+      this.gameState = this.curTermino.doesPieceFit(
+        this.curPosX,
+        this.curPosY,
+        this.curRotation
+      )
+        ? 1
+        : 0;
     }
   }
 };
-
 Game.drawMap = function () {
   //clear map
   this.ctx.beginPath();
