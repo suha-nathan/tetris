@@ -163,7 +163,7 @@ Game.tick = function (elapsed) {
   let delta = (elapsed - this.prevElapsed) / 1000.0;
   delta = Math.min(delta, 0.25);
 
-  if (elapsed - this.prevElapsed >= 60) {
+  if (elapsed - this.prevElapsed >= 120) {
     this.update(delta); //updating game state/map/termino position
     this.render(); //re-rendering/drawing the map and termino
 
@@ -187,6 +187,7 @@ Game.init = () => {
   this.curPosX = ~~(map.cols / 2) - 1;
   this.curPosY = 0;
   this.curRotation = 0;
+  this.score = 0;
   map.setEmpty();
   // map.setTest();
 };
@@ -260,17 +261,20 @@ Game.update = (delta) => {
       //lock piece in place
       for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
-          pi = this.rotate(j, i, rotation); // index of termino
+          pi = this.curTermino.rotate(j, i, this.curRotation); // index of termino
           fi = (this.curPosY + i) * map.cols + (this.curPosX + j); // index of map field
+          console.log("index of map field locked into place: ", fi);
+
           if (this.curTermino.shape[pi] == 1) {
             map.blockLayer[fi] = 1;
           }
         }
       }
+      let toBeCleared;
       let linesToBeCleared = [];
       //check for lines that termino was in and remove
       for (let i = 0; i < 4; i++) {
-        let toBeCleared = true;
+        toBeCleared = true;
         for (let j = 0; j < map.rows && toBeCleared; j++) {
           fi = (this.curPosY + i) * map.cols + j;
           if (map.blockLayer[fi] == 0) {
@@ -287,9 +291,11 @@ Game.update = (delta) => {
           for (let x = 0; x < map.cols; x++) {
             map.blockLayer[y * map.cols + x] = 0; // clears the line but How to shift down??
           }
+          this.score++;
         });
       }
-      //increase score
+
+      //shift line down?
 
       //pick new piece - update curTermino. reset piece position
       let rand = Math.floor(Math.random() * 6 + 1);
@@ -307,6 +313,8 @@ Game.update = (delta) => {
         ? 1
         : 0;
     }
+  } else {
+    console.log("GAME OVER");
   }
 };
 Game.drawMap = function () {
@@ -315,7 +323,7 @@ Game.drawMap = function () {
   this.ctx.fillStyle = "white";
   this.ctx.fillRect(0, 0, map.cols * map.tileSize, map.rows * map.tileSize);
   let markX = 0;
-  let markY = (map.rows - 1) * map.tileSize;
+  let markY = 400 - 64;
 
   map.blockLayer.forEach((tile, index) => {
     if (tile === 1) {
@@ -323,8 +331,9 @@ Game.drawMap = function () {
       this.ctx.fillStyle = "red";
       this.ctx.fillRect(markX, markY, map.tileSize, map.tileSize);
     }
-    markX = ((index + 1) % map.cols) * map.tileSize;
-    markY = (map.rows - 1 - ~~((index + 1) / map.cols)) * map.tileSize;
+    markX = (index % map.cols) * map.tileSize;
+    markY = (~~index / map.cols) * map.tileSize;
+    // markY = (map.rows - 1 - ~~((index + 1) / map.cols)) * map.tileSize;
   });
 };
 
