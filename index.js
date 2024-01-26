@@ -240,7 +240,7 @@ Game.update = (delta) => {
 
   if (this.gameState) {
     //update difficulty every ___
-
+    let fi;
     ////test if the piece can be moved down
     if (
       this.curTermino.doesPieceFit(
@@ -262,30 +262,24 @@ Game.update = (delta) => {
           }
         }
       }
+
       let toBeCleared;
       let linesToBeCleared = [];
       //check for lines that termino was in and remove
       for (let i = 0; i < 4; i++) {
-        toBeCleared = true;
-        console.log("checking line: ", this.curPosY + i);
-        for (let j = 0; j < map.rows && toBeCleared; j++) {
-          fi = (this.curPosY + i) * 10 + j;
-          if (map.blockLayer[fi] == 0) {
-            console.log("changing to false: ", fi);
-            toBeCleared = false;
+        if (this.curPosY + i < map.rows) {
+          toBeCleared = true;
+          for (let j = 0; j < map.cols; j++) {
+            fi = (this.curPosY + i) * map.cols + j;
+            toBeCleared = toBeCleared && map.blockLayer[fi] != 0;
+          }
+          if (toBeCleared) {
+            for (let x = 0; x < map.cols; x++) {
+              map.blockLayer[(this.curPosY + i) * map.cols + x] = 0; // clears the line but How to shift down??
+            }
+            linesToBeCleared.push(this.curPosY + i);
           }
         }
-        if (toBeCleared) linesToBeCleared.push(this.curPosY + i);
-      }
-      console.log("lines to be cleared: ", linesToBeCleared);
-
-      if (linesToBeCleared.length > 0) {
-        linesToBeCleared.forEach((y) => {
-          for (let x = 0; x < map.cols; x++) {
-            map.blockLayer[y * map.cols + x] = 0; // clears the line but How to shift down??
-          }
-          this.score++;
-        });
       }
 
       //shift line down?
