@@ -129,12 +129,6 @@ class Termino {
         pi = this.rotate(j, i, rotation); // index of termino
         fi = (y + i) * map.cols + (x + j); // index of map field
         if (this.shape[pi] == 1 && map.blockLayer[fi] != 0) {
-          console.log(
-            "piece hitting map: setting to false",
-            this.shape[pi],
-            map.blockLayer[fi]
-          );
-
           isFit = false;
         }
         //check if piece is in bounds
@@ -142,7 +136,6 @@ class Termino {
           this.shape[pi] == 1 &&
           (y + i >= map.rows || x + j < 0 || x + j >= map.cols)
         ) {
-          console.log("piece not gg to be in bounds: set to false");
           isFit = false;
         }
       }
@@ -184,8 +177,8 @@ Game.init = () => {
 
   this.gameState = 1; //1 game is active. 0 game over. !TODO - pause game play.
   this.curTermino = new Termino(2); //!TODO - generate randomly
-  this.curPosX = ~~(map.cols / 2) - 1;
-  this.curPosY = 0;
+  this.curPosX = 5 - 2;
+  this.curPosY = -2;
   this.curRotation = 0;
   this.score = 0;
   map.setEmpty();
@@ -261,10 +254,9 @@ Game.update = (delta) => {
       //lock piece in place
       for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
+          // termino keeps shifting left when locking into place. j is x i is y
           pi = this.curTermino.rotate(j, i, this.curRotation); // index of termino
           fi = (this.curPosY + i) * map.cols + (this.curPosX + j); // index of map field
-          console.log("index of map field locked into place: ", fi);
-
           if (this.curTermino.shape[pi] == 1) {
             map.blockLayer[fi] = 1;
           }
@@ -275,16 +267,17 @@ Game.update = (delta) => {
       //check for lines that termino was in and remove
       for (let i = 0; i < 4; i++) {
         toBeCleared = true;
+        console.log("checking line: ", this.curPosY + i);
         for (let j = 0; j < map.rows && toBeCleared; j++) {
-          fi = (this.curPosY + i) * map.cols + j;
+          fi = (this.curPosY + i) * 10 + j;
           if (map.blockLayer[fi] == 0) {
+            console.log("changing to false: ", fi);
             toBeCleared = false;
           }
         }
-        if (toBeCleared) {
-          linesToBeCleared.push(this.curPosY + i);
-        }
+        if (toBeCleared) linesToBeCleared.push(this.curPosY + i);
       }
+      console.log("lines to be cleared: ", linesToBeCleared);
 
       if (linesToBeCleared.length > 0) {
         linesToBeCleared.forEach((y) => {
@@ -300,7 +293,7 @@ Game.update = (delta) => {
       //pick new piece - update curTermino. reset piece position
       let rand = Math.floor(Math.random() * 6 + 1);
       this.curTermino = new Termino(rand);
-      this.curPosX = ~~(map.cols / 2) + 1;
+      this.curPosX = 3;
       this.curPosY = 0;
       this.curRotation = 0;
 
@@ -323,16 +316,17 @@ Game.drawMap = function () {
   this.ctx.fillStyle = "white";
   this.ctx.fillRect(0, 0, map.cols * map.tileSize, map.rows * map.tileSize);
   let markX = 0;
-  let markY = 400 - 64;
+  let markY = 400 - map.tileSize;
 
   map.blockLayer.forEach((tile, index) => {
+    markX = (index % map.cols) * map.tileSize;
+    markY = ~~(index / map.cols) * map.tileSize;
     if (tile === 1) {
       this.ctx.beginPath();
       this.ctx.fillStyle = "red";
       this.ctx.fillRect(markX, markY, map.tileSize, map.tileSize);
     }
-    markX = (index % map.cols) * map.tileSize;
-    markY = (~~index / map.cols) * map.tileSize;
+
     // markY = (map.rows - 1 - ~~((index + 1) / map.cols)) * map.tileSize;
   });
 };
@@ -343,7 +337,6 @@ Game.drawTermino = () => {
   let markX = initX,
     markY = initY;
   let pi;
-  console.log(initX, initY);
 
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
