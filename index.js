@@ -254,7 +254,7 @@ Game.update = (delta) => {
       //lock piece in place
       for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
-          // termino keeps shifting left when locking into place. j is x i is y
+          // j is x. i is y
           pi = this.curTermino.rotate(j, i, this.curRotation); // index of termino
           fi = (this.curPosY + i) * map.cols + (this.curPosX + j); // index of map field
           if (this.curTermino.shape[pi] == 1) {
@@ -265,6 +265,7 @@ Game.update = (delta) => {
 
       let toBeCleared;
       let linesToBeCleared = [];
+
       //check for lines that termino was in and remove
       for (let i = 0; i < 4; i++) {
         if (this.curPosY + i < map.rows) {
@@ -283,6 +284,15 @@ Game.update = (delta) => {
       }
 
       //shift line down?
+
+      linesToBeCleared.forEach((line) => {
+        map.blockLayer.splice(line * map.cols, map.cols);
+        let newLayer = new Array(map.cols).fill(0);
+        map.blockLayer.unshift(...newLayer);
+        // for (let i = 0; i < map.cols; i++) {
+        //   map.blockLayer.unshift(0);
+        // }
+      });
 
       //pick new piece - update curTermino. reset piece position
       let rand = Math.floor(Math.random() * 6 + 1);
