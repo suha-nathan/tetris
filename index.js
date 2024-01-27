@@ -176,7 +176,8 @@ Game.init = () => {
   ]);
 
   this.gameState = 1; //1 game is active. 0 game over. !TODO - pause game play.
-  this.curTermino = new Termino(2); //!TODO - generate randomly
+  let rand = Math.floor(Math.random() * 6 + 1);
+  this.curTermino = new Termino(rand);
   this.curPosX = 5 - 2;
   this.curPosY = -2;
   this.curRotation = 0;
@@ -197,7 +198,6 @@ Game.update = (delta) => {
         this.curRotation
       )
     ) {
-      console.log("left");
       this.curPosX -= 1;
     }
   }
@@ -210,7 +210,6 @@ Game.update = (delta) => {
       this.curRotation
     )
   ) {
-    console.log("right");
     this.curPosX += 1;
   }
 
@@ -222,7 +221,6 @@ Game.update = (delta) => {
       this.curRotation
     )
   ) {
-    console.log("down");
     this.curPosY += 1;
   }
 
@@ -234,7 +232,6 @@ Game.update = (delta) => {
       this.curRotation + 1
     )
   ) {
-    console.log("rotate");
     this.curRotation += 1;
   }
 
