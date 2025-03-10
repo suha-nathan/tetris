@@ -101,7 +101,7 @@ class Termino {
   rotate(px, py, rotation) {
     //rotation is 0, 90, 180 or 270
     // function returns index of shape for a given px and py for a rotation.
-    // rotation 0 just gives the index of the arr in constructor for a given px py (in 4 by 4 coordinates)
+    // rotation just gives the index of the arr in constructor for a given px py (in 4 by 4 coordinates)
     let index;
     switch (rotation % 4) {
       case 0:
@@ -113,7 +113,7 @@ class Termino {
       case 2:
         index = 15 - 4 * py - px;
         break;
-      case 3: //might be wrong
+      case 3:
         index = 3 - py + 4 * px;
         break;
     }
