@@ -149,7 +149,7 @@ Game.run = function (context) {
   this.prevElapsed = 0;
   //if need to load assets, use Promise here.
   this.init();
-  window.requestAnimationFrame(this.tick); //initiallises the Game Loop
+  window.requestAnimationFrame(this.tick); //initialises the Game Loop
 };
 
 Game.tick = function (elapsed) {
@@ -280,7 +280,7 @@ Game.update = (delta) => {
         }
       }
 
-      //shift line down?
+      //shift line down
 
       linesToBeCleared.forEach((line) => {
         map.blockLayer.splice(line * map.cols, map.cols);

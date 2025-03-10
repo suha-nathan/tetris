@@ -1,14 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tetris</title>
     <link rel="stylesheet" href="main.css">
 </head>
+
 <body>
-    <canvas id="game-map" width = "400", height="600" style = "border:1px solid grey"></canvas>
-    
-    <script src="index.js"></script>
+    <div class="game-container">
+        <h1 class="game-title">Tetris</h1>
+        <canvas id="game-map" style="border:1px solid grey"></canvas>
+
+    </div>
+    <div class="game-controls">
+        <h3>Controls</h3>
+        <ul class="control-list">
+            <li><span class="key">←</span> <span>Move Left</span></li>
+            <li><span class="key">→</span> <span>Move Right</span></li>
+            <li><span class="key">↓</span> <span>Move Down</span></li>
+            <li><span class="key">↑</span> <span>Rotate</span></li>
+            <li><span class="key">Space</span> <span>Rotate/Restart</span></li>
+            <li><span class="key">P</span> <span>Pause/Resume</span></li>
+        </ul>
+    </div>
+
+    <script src="index-new.js"></script>
 </body>
+
 </html>
