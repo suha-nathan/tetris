@@ -39,4 +39,10 @@ export class GameBoard {
     //position is empty if it is "0"
     return this.grid[y][x] === 0;
   }
+
+  /**
+   * places a termino on the board by editing grid
+   * @param {Termino} termino piece to be placed on game board
+   */
+  placeTermino(termino) {}
 }
