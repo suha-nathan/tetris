@@ -1,4 +1,14 @@
-export class GameBoard {
+/**
+ * Game board class
+ * Manages the game grid and pieces
+ */
+
+export default class GameBoard {
+  /**
+   * defines the GameBoard and grid
+   * @param {number} cols number of columns (x axis)
+   * @param {number} rows number of rows (y axis)
+   */
   constructor(cols, rows) {
     this.cols = cols;
     this.rows = rows;
@@ -21,7 +31,7 @@ export class GameBoard {
    * @param {number} y y coordinate of input position
    * @returns {boolean} true if position is within grid bounds
    */
-  isValidPosition(x, y) {
+  isPositionInBounds(x, y) {
     return x >= 0 && x < this.cols && y >= 0 && y < this.rows;
   }
   /**
@@ -32,7 +42,7 @@ export class GameBoard {
    */
   isEmptyPosition(x, y) {
     //out of bounds positions aren't empty
-    if (!this.isValidPosition(x, y)) {
+    if (!this.isPositionInBounds(x, y)) {
       return false;
     }
 
@@ -41,8 +51,20 @@ export class GameBoard {
   }
 
   /**
-   * places a termino on the board by editing grid
+   * edits game board to represent the termino in the grid
+   * used by Game controller to modify grid if needed
    * @param {Termino} termino piece to be placed on game board
    */
-  placeTermino(termino) {}
+  placeTermino(termino) {
+    const positionTermino = termino.position;
+    const shapeTermino = termino.shape; // need to rotate termino
+
+    //check for empty position
+  }
+
+  /**
+   * checks for complete lines in grid and clears them if necessary
+   * used by Game Controller after each termino is placed
+   */
+  clearLines() {}
 }

@@ -1,8 +1,7 @@
 /* Keyboard handler class
  * Manages keyboard input
  */
-
-export class KeyboardController {
+export default class KeyboardController {
   constructor() {
     this.keys = {};
     this.keyRepeatTimers = {}; //timer ID stored for each key
