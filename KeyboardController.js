@@ -87,7 +87,7 @@ export default class KeyboardController {
    * Set a callback function for key press events
    * @param {Function} callback - function to call when key is pressed (handles game logic)
    */
-  setKeyPressCallback() {
+  setKeyPressCallback(callback) {
     this.keyPressCallback = callback;
   }
 }

@@ -1,6 +1,6 @@
-import GameBoard from "./GameBoard";
-import KeyboardController from "./KeyboardController";
-import Termino from "./Termino";
+import GameBoard from "./GameBoard.js";
+import KeyboardController from "./KeyboardController.js";
+import Termino from "./Termino.js";
 
 const GAME_CONSTANTS = {
   COLS: 10,
@@ -24,7 +24,7 @@ const KEY_CODES = {
   P: "KeyP", // Pause
 };
 
-export default class Game {
+export class Game {
   constructor(canvasId) {
     //initialise canvas and context
     this.canvas = document.getElementById(canvasId);
@@ -37,7 +37,7 @@ export default class Game {
     this.keyboard = new KeyboardController();
 
     //create gameboard
-    this.gameBoard = new GameBoard(GAME_CONSTANTS.COLS, GAME_CONSTANTS.rows);
+    this.gameBoard = new GameBoard(GAME_CONSTANTS.COLS, GAME_CONSTANTS.ROWS);
 
     //setup game state/stats
     this.paused = false;
@@ -143,25 +143,78 @@ export default class Game {
 
   /**
    * checks for collisions and moves the termino on the game board if possible
-   * @param {number} x
-   * @param {number} y
+   * @param {number} dx
+   * @param {number} dy
    * @returns {boolean} true if the termino is moved, false if it is not
    */
-  moveTermino(x, y) {
+  moveTermino(dx, dy) {
     let isMoved = false;
 
+    const newPose = {
+      x: this.currTermino.position.x + dx,
+      y: this.currTermino.position.y + dy,
+    };
+
+    if (this.currTermino.canMoveTo(this.gameBoard, newPose)) {
+      this.currTermino.move(dx, dy);
+      isMoved = true;
+    }
     return isMoved;
   }
 
   /**
    * checks for collisions and rotates termino if possible
+   * @returns {boolean} false if termino cant rotate
    */
-  rotateTermino() {}
+  rotateTermino() {
+    let isRotated = false;
+    const newRotationState = (this.currTermino.rotation + 1) % 4;
+
+    if (
+      this.currTermino.canMoveTo(
+        this.gameBoard,
+        this.currTermino.position,
+        newRotationState
+      )
+    ) {
+      this.currTermino.rotate();
+      isRotated = true;
+    }
+    //TODO: if rotation fails, try shifting termino away from the wall and then the rotation
+
+    return isRotated;
+  }
 
   /**
    * locks termino in place at location, calculates new game board, spawns new termino
    */
-  lockTermino() {}
+  lockTermino() {
+    //update game board with current termino
+    this.gameBoard.placeTermino(this.currTermino);
+
+    //update lines cleared, score
+    const lines = this.gameBoard.clearLines();
+    this.linesCleared += lines;
+    this.score += lines * this.level * GAME_CONSTANTS.POINTS_PER_LINE;
+
+    //update level
+    // e.g. 8 lines cleared, level 1; 10 lines cleared, level 2, 24 lines cleared, level 3
+    const newLevel =
+      Math.floor(this.linesCleared / GAME_CONSTANTS.LEVEL_UP_LINES) + 1;
+
+    //increase game speed every level up (reducing the drop interval by 50ms every level to a minimum of 100ms)
+    if (newLevel > this.level) {
+      this.level = newLevel;
+      this.dropInterval = Math.max(
+        GAME_CONSTANTS.MIN_DROP_INTERVAL,
+        GAME_CONSTANTS.DROP_INTERVAL -
+          (this.level - 1) * GAME_CONSTANTS.SPEED_INCREASE
+      );
+    }
+
+    //update terminoes
+    this.spawnNewTermino();
+  }
 
   /**
    * randomly generates a new Termino
@@ -223,5 +276,17 @@ export default class Game {
   /**
    * draws on canvas all the game elements - board, termino, game stats, overlay
    */
-  render() {}
+  render() {
+    //draw canvas
+    this.ctx.fillStyle = "#F0F0F0";
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    //draw grid lines
+
+    //draw the board
+
+    //draw the current termino
+
+    //draw pause or game overlay
+  }
 }

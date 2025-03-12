@@ -57,14 +57,51 @@ export default class GameBoard {
    */
   placeTermino(termino) {
     const positionTermino = termino.position;
-    const shapeTermino = termino.shape; // need to rotate termino
+    const shapeTermino = termino.getRotatedShape();
 
     //check for empty position
+    for (let y = 0; y < shapeTermino.length; y++) {
+      for (let x = 0; x < shapeTermino.length; x++) {
+        if (shapeTermino[y][x]) {
+          const xPose = positionTermino.x + x;
+          const yPose = positionTermino.y + y;
+          if (this.isPositionInBounds(xPose, yPose)) {
+            this.grid[yPose][xPose] = termino.color;
+          }
+        }
+      }
+    }
   }
 
   /**
    * checks for complete lines in grid and clears them if necessary
    * used by Game Controller after each termino is placed
    */
-  clearLines() {}
+  clearLines() {
+    let numClearedLines = 0;
+
+    //loop through all the rows in the grid from the bottom to the top
+    for (let y = this.rows - 1; y >= 0; y--) {
+      if (this.isLineComplete(y)) {
+        // remove/splice the completed line
+        this.grid.splice(y, 1);
+        // add new empty line to the top of the grid
+        this.grid.unshift(new Array(this.cols).fill(0));
+
+        //increase counter
+        numClearedLines++;
+        y++; //recheck the same row
+      }
+    }
+    return numClearedLines;
+  }
+
+  /**
+   * checkes each cell in the row of the grid if it is filled/non empty
+   * @param {number} y index of row of grid to be checked
+   * @returns {boolean}
+   */
+  isLineComplete(y) {
+    return this.grid[y].every((cell) => cell !== 0);
+  }
 }
