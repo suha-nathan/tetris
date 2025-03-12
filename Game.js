@@ -282,11 +282,138 @@ export class Game {
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     //draw grid lines
+    this.drawGridLines();
 
     //draw the board
+    this.drawBoard();
 
     //draw the current termino
+    if (this.currTermino && !this.gameOver) {
+      this.drawTermino(this.currTermino);
+    }
 
-    //draw pause or game overlay
+    //draw pause or gameOver overlay
+    if (this.paused || this.gameOver) {
+      this.drawOverlay();
+    }
+  }
+
+  /**
+   * Draw a single block
+   * @param {number} x - X coordinate
+   * @param {number} y - Y coordinate
+   * @param {string} color - Block color
+   */
+  drawBlock(x, y, color) {
+    const tileSize = GAME_CONSTANTS.TILE_SIZE;
+    const pixelX = x * tileSize;
+    const pixelY = y * tileSize;
+
+    // Draw filled block
+    this.ctx.fillStyle = color;
+    this.ctx.fillRect(pixelX, pixelY, tileSize, tileSize);
+
+    // Draw highlight
+    this.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    this.ctx.fillRect(pixelX, pixelY, tileSize, 4);
+    this.ctx.fillRect(pixelX, pixelY, 4, tileSize);
+
+    // Draw shadow
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+    this.ctx.fillRect(pixelX + tileSize - 4, pixelY, 4, tileSize);
+    this.ctx.fillRect(pixelX, pixelY + tileSize - 4, tileSize, 4);
+
+    // Draw outline
+    this.ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
+    this.ctx.lineWidth = 1;
+    this.ctx.strokeRect(pixelX, pixelY, tileSize, tileSize);
+  }
+
+  drawGridLines() {
+    this.ctx.strokeStyle = "#DDDDDD";
+    this.ctx.lineWidth = 0.5;
+
+    // Draw vertical grid lines
+    for (let x = 0; x <= this.canvas.width; x += GAME_CONSTANTS.TILE_SIZE) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(x, 0);
+      this.ctx.lineTo(x, this.canvas.height);
+      this.ctx.stroke();
+    }
+
+    // Draw horizontal grid lines
+    for (let y = 0; y <= this.canvas.height; y += GAME_CONSTANTS.TILE_SIZE) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, y);
+      this.ctx.lineTo(this.canvas.width, y);
+      this.ctx.stroke();
+    }
+  }
+
+  drawBoard() {
+    for (let y = 0; y < this.gameBoard.rows; y++) {
+      for (let x = 0; x < this.gameBoard.cols; x++) {
+        const cellColor = this.gameBoard.grid[y][x];
+        if (cellColor !== 0) {
+          this.drawBlock(x, y, cellColor);
+        }
+      }
+    }
+  }
+
+  drawTermino(termino) {
+    const shape = termino.getRotatedShape();
+    const pos = termino.position;
+
+    for (let y = 0; y < shape.length; y++) {
+      for (let x = 0; x < shape[y].length; x++) {
+        if (shape[y][x]) {
+          const drawX = pos.x + x;
+          const drawY = pos.y + y;
+
+          // Only draw if it's on the board
+          //   if (drawY >= 0) {
+          this.drawBlock(drawX, drawY, termino.color);
+          //   }
+        }
+      }
+    }
+  }
+  drawOverlay() {
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.ctx.fillStyle = "white";
+    this.ctx.font = "24px Arial";
+    this.ctx.textAlign = "center";
+
+    if (this.gameOver) {
+      this.ctx.fillText(
+        "GAME OVER",
+        this.canvas.width / 2,
+        this.canvas.height / 2 - 30
+      );
+      this.ctx.fillText(
+        `Final Score: ${this.score}`,
+        this.canvas.width / 2,
+        this.canvas.height / 2
+      );
+      this.ctx.fillText(
+        "Press SPACE to restart",
+        this.canvas.width / 2,
+        this.canvas.height / 2 + 30
+      );
+    } else if (this.paused) {
+      this.ctx.fillText(
+        "PAUSED",
+        this.canvas.width / 2,
+        this.canvas.height / 2
+      );
+      this.ctx.fillText(
+        "Press P to continue",
+        this.canvas.width / 2,
+        this.canvas.height / 2 + 30
+      );
+    }
   }
 }

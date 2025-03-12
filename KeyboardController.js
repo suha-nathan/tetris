@@ -48,6 +48,8 @@ export default class KeyboardController {
         //clear any existing timers for keyCode
         if (this.keyRepeatTimers[keyCode]) {
           clearTimeout(this.keyRepeatTimers[keyCode]);
+          clearInterval(this.keyRepeatTimers[keyCode]);
+          this.keyRepeatTimers[keyCode] = null;
         }
 
         // key holds longer than keyRepeatDelay(150ms) result in the callback executing every 50ms
@@ -72,7 +74,7 @@ export default class KeyboardController {
     //if key code is being tracked, handle the keyup event, ignore all other key code press
     if (keyCode in this.keys) {
       event.preventDefault();
-      this.keyRepeatTimers[keyCode] = false;
+      this.keys[keyCode] = false;
 
       //clear any timers or intervals
       if (this.keyRepeatTimers[keyCode]) {
