@@ -66,5 +66,74 @@ export default class Game {
     this.keyboard.setKeyPressCallback(this.handleKeyPress.bind(this));
   }
 
-  handleKeyPress(keyCode) {}
+  handleKeyPress(keyCode) {
+    //check if game over
+    //if game over and space is pressed, reset game
+    //check if pause button is pressed - toggle the pause state
+
+    //if game state is paused or is gameOver, dont handle any other key press
+    if (this.paused || this.gameOver) {
+      return;
+    }
+
+    if (keyCode === KEY_CODES.P) {
+      //toggle pause
+      this.paused = !this.paused;
+    } else if (keyCode === KEY_CODES.LEFT) {
+      //move left
+      this.moveTermino(-1, 0);
+    } else if (keyCode === KEY_CODES.RIGHT) {
+      //move right
+      this.moveTermino(1, 0);
+    } else if (keyCode === KEY_CODES.DOWN) {
+      //move down, lock termino into board position if unable to move down
+      if (!this.moveTermino(0, 1)) {
+        this.lockTermino();
+      }
+    } else if (keyCode === KEY_CODES.UP || keyCode === KEY_CODES.SPACE) {
+      //rotate
+    }
+  }
+
+  resetGame() {
+    //set the gameboard to original state
+    this.gameBoard.clearBoard();
+
+    //set game stats to original
+    this.paused = false;
+    this.gameOver = false;
+    this.score = 0;
+    this.linesCleared = 0;
+    this.level = 1;
+
+    //spawn new termino
+    this.currTermino = null;
+    this.nextTermino = null;
+
+    this.lastFrameTime = 0;
+    this.dropCounter = 0;
+    this.dropInterval = GAME_CONSTANTS.DROP_INTERVAL;
+  }
+
+  /**
+   * checks for collisions and moves the termino on the game board if possible
+   * @param {number} x
+   * @param {number} y
+   * @returns {boolean} true if the termino is moved, false if it is not
+   */
+  moveTermino(x, y) {
+    let isMoved = false;
+
+    return isMoved;
+  }
+
+  /**
+   * checks for collisions and rotates termino if possible
+   */
+  rotateTermino() {}
+
+  /**
+   * locks termino in place at location
+   */
+  lockTermino() {}
 }
