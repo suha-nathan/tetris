@@ -5,4 +5,6 @@
 window.onload = () => {
   // Create and start the game
   const tetris = new TetrisGame("game-map");
+
+  tetris.start();
 };

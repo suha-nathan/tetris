@@ -68,9 +68,13 @@ export default class Termino {
   /**
    * checks if an input position and rotation of termino is valid
    * @param {GameBoard} board
-   * @param {Object} position
-   * @param {number} rotation
-   * @returns {boolean}
+   * @param {Object} position x y coords to test, default is current termino position
+   * @param {number} rotation rotation state, defaule is current termino rotation
+   * @returns {boolean} true if the termino can move to specified position and rotation
    */
-  canMoveTo(board, position, rotation) {}
+  canMoveTo(board, position = this.position, rotation = this.rotation) {
+    let isMovable = false;
+
+    return isMovable;
+  }
 }
