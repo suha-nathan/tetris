@@ -104,7 +104,7 @@ export default class Termino {
     //rotate by 90 degrees
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
-        rotated[x][size - 1 - y] = this.shape[y][x]; //rotation calculation
+        rotated[x][size - 1 - y] = matrix[y][x]; //rotation calculation
       }
     }
     return rotated;
