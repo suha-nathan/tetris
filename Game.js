@@ -126,8 +126,8 @@ export class Game {
     this.gameBoard.clearBoard();
 
     //reset terminos
-    this.currTermino = null;
-    this.nextTermino = null;
+    this.nextTermino = this.createRandomTermino();
+    this.spawnNewTermino();
 
     //set game stats to original
     this.paused = false;
