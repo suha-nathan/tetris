@@ -44,9 +44,13 @@ File Structure - Component Based Design:
 
 ### Key Game Mechanics Concepts
 
-Game Loop Implementation
+#### Game Loop Implementation
 
-Collision Detection System
+Utilised the `requestAnimationFrame` method from the `Window` interface to continuously update the state within the game loop. The Canvas API was used to render the graphics on every loop. This allowed for the use of Javascript and the `<canvas>` in the HTML to render the tetris game.
+
+The timing and smooth animation of the tetris movement is controlled within the game loop by keeping track of the time intervals and time elapsed during each frame update.
+
+#### Collision Detection System
 
 User Input Handling
 
