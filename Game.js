@@ -180,7 +180,36 @@ export class Game {
       this.currTermino.rotate();
       isRotated = true;
     }
-    //TODO: if rotation fails, try shifting termino away from the wall and then the rotation
+
+    //if rotation fails, try shifting termino away from the wall and see if rotation works
+    const shifts = [
+      { x: 1, y: 0 },
+      { x: -1, y: 0 },
+      { x: 0, y: -1 },
+      { x: 2, y: 0 },
+      { x: -2, y: 0 },
+    ];
+
+    if (!isRotated) {
+      for (let i = 0; i < shifts.length && !isRotated; i++) {
+        let shiftedPose = {
+          x: this.currTermino.position.x + shifts[i].x,
+          y: this.currTermino.position.y + shifts[i].y,
+        };
+
+        if (
+          this.currTermino.canMoveTo(
+            this.gameBoard,
+            shiftedPose,
+            newRotationState
+          )
+        ) {
+          this.currTermino.move(shifts[i].x, shifts[i].y);
+          this.currTermino.rotate();
+          isRotated = true;
+        }
+      }
+    }
 
     return isRotated;
   }
@@ -287,6 +316,9 @@ export class Game {
     //draw the board
     this.drawBoard();
 
+    //draw the game level, score, lines cleared
+    this.drawGameState();
+
     //draw the current termino
     if (this.currTermino && !this.gameOver) {
       this.drawTermino(this.currTermino);
@@ -359,6 +391,20 @@ export class Game {
         }
       }
     }
+  }
+  drawGameState() {
+    this.ctx.fillStyle = "black";
+    this.ctx.font = "16px Arial";
+    this.ctx.textAlign = "left";
+
+    //overlay for text
+    this.ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+    this.ctx.fillRect(5, 5, 150, 65); //top left
+
+    this.ctx.fillStyle = "black";
+    this.ctx.fillText(`Score: ${this.score}`, 10, 25);
+    this.ctx.fillText(`Level: ${this.level}`, 10, 45);
+    this.ctx.fillText(`Lines: ${this.linesCleared}`, 10, 65);
   }
 
   drawTermino(termino) {
