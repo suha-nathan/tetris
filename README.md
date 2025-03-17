@@ -8,7 +8,7 @@ Tetris is a game that requires game players to control game pieces to arrange th
 Main technologies used - Javascript, HTML Canvas.
 No external npm packages or external libraries used.
 
-Main Development Goal - To try to reverse engineer a simple game of tetris into its constituent components. Some questions that came to me when designing the game:
+Main Development Goal - To try to reverse engineer a simple game of tetris into its constituent components. Some questions that occurred to me when designing the game:
 
 - How to represent a game piece (termino) in code?
 - How to rotate a game piece algorithmically?
