@@ -10,10 +10,10 @@ No external npm packages or external libraries used.
 
 Main Development Goal - To try to reverse engineer a simple game of tetris into its constituent components. Some questions that came to me when designing the game:
 
-- How do I represent a termino in code?
-- How do I rotate a game piece algorithmically?
+- How to represent a game piece (termino) in code?
+- How to rotate a game piece algorithmically?
 - How to gracefully handle the varuous game state changes and render the game board, pieces smoothly?
-- Would it be possible to design it in an object oriented way such that the various components of the game mechanics are not entangled in spaghetti code.
+- How to represent and design the game in an object oriented way such that the various components of the game mechanics are not entangled in spaghetti code.
 
 #### The game board:
 
